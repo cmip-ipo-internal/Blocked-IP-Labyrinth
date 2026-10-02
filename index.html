@@ -14,40 +14,40 @@
             overflow: hidden; /* Prevents humans from scrolling through empty space */
         }
 
-/* Center an image in an absolute block plane in front of everything */
-.centered-image-plane {
-    position: fixed; /* Locks to the viewport and stays centered during scroll */
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: 99999; /* Forces it to the very front layer */
-    
-    /* Flexbox centering alignment handles absolute midpoints perfectly */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    
-    /* Makes the background layer completely transparent */
-    background: transparent; 
-    
-    /* Optional: Intercepts clicks if using as a safety guard shield */
-    pointer-events: auto; 
-}
+        /* Center an image in an absolute block plane in front of everything */
+        .centered-image-plane {
+            position: fixed; /* Locks to the viewport and stays centered during scroll */
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 99999; /* Forces it to the front layer, behind the tracker text */
+            
+            /* Flexbox centering alignment handles absolute midpoints perfectly */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            
+            /* Makes the background layer completely transparent */
+            background: transparent; 
+            
+            /* Intercepts clicks if using as a safety guard shield */
+            pointer-events: auto; 
+        }
 
-.centered-image-plane img {
-    max-width: 90%;  /* Responsive bounding constraints */
-    max-height: 90%;
-    object-fit: contain;
-}
+        .centered-image-plane img {
+            max-width: 90%;  /* Responsive bounding constraints */
+            max-height: 90%;
+            object-fit: contain;
+        }
         
-        /* IP Display Area at the top - fully visible */
+        /* IP Display Area at the top - fully visible and interactive */
         #ip-tracker {
             font-size: 1rem;
             font-weight: bold;
             margin-bottom: 20px;
             position: relative;
-            z-index: 10000; /* Keeps it above the protective overlay */
+            z-index: 100000; /* Elevated above the image plane and shield */
         }
 
         /* Invisible Labyrinth: Hidden completely from sight but exists in the DOM for bots */
@@ -76,7 +76,7 @@
             width: 100vw;
             height: 100vh;
             background: transparent;
-            z-index: 9999; /* Sits directly on top of the hidden links */
+            z-index: 9998; /* Sits directly on top of the hidden links, behind the graphic layer */
             cursor: default;
         }
     </style>
@@ -86,21 +86,28 @@
     <!-- Protective overlay to stop accidental user interaction -->
     <div class="click-shield"></div>
 
-    <!-- <!-- IP Display Requirement -->
-    <div id="ip-tracker">Your IP: <span id="user-ip">Detecting...</span></div> -->
+    <!-- Corrected IP Display Container (Brought back from broken comment tags) -->
+    <div id="ip-tracker">Your IP: <span id="user-ip">Detecting...</span></div>
 
+    <!-- Centered SVG Image Plane -->
+    <div class="centered-image-plane">
+        <img src="./data/cmip-fail-image.svg" alt="Centered Shield Graphic">
+    </div>
 
-<!-- 1. Place this function ABOVE your trap loop generator -->
-<script>
-    function displayUserIP(json) {
-        document.getElementById('user-ip').textContent = json.ip;
-    }
-</script>
+    <!-- 1. JSONP Callback Function to bypass CORS blocks safely -->
+    <script>
+        function displayUserIP(json) {
+            const ipSpan = document.getElementById('user-ip');
+            if (ipSpan && json && json.ip) {
+                ipSpan.textContent = json.ip;
+            }
+        }
+    </script>
 
-<!-- 2. Dynamically trigger the JSONP callback resource from ipify -->
-<script src="https://ipify.org"></script>
+    <!-- 2. Dynamically trigger the JSONP script execution -->
+    <script src="https://ipify.org" onerror="document.getElementById('user-ip').textContent='Unavailable';"></script>
     
-    <!-- Hidden Bot Labyrinth -->
+    <!-- Hidden Bot Labyrinth Container -->
     <div class="labyrinth-container" aria-hidden="true">
         <ul class="directory-list" id="labyrinth-nodes">
             <!-- Links dynamically injected here -->
@@ -108,17 +115,7 @@
     </div>
 
     <script>
-        // 1. Fetch and display the user's IP at the top of the page
-fetch('https://ipify.org')
-    .then(response => response.json())
-    .then(data => {
-        document.getElementById('user-ip').textContent = data.ip;
-    })
-    .catch(() => {
-        document.getElementById('user-ip').textContent = "Unavailable";
-    });
-
-        // 2. Generate the alternating trap labyrinth
+        // Generate the alternating trap labyrinth
         (function() {
             function generateRandomKey(length) {
                 const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
@@ -154,11 +151,6 @@ fetch('https://ipify.org')
             }
         })();
     </script>
-
-    <div class="centered-image-plane">
-    <img src="./data/cmip-fail-image.svg" alt="Centered Shield Graphic">
-</div>
-
     
 </body>
 </html>
