@@ -14,6 +14,33 @@
             overflow: hidden; /* Prevents humans from scrolling through empty space */
         }
 
+/* Center an image in an absolute block plane in front of everything */
+.centered-image-plane {
+    position: fixed; /* Locks to the viewport and stays centered during scroll */
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 99999; /* Forces it to the very front layer */
+    
+    /* Flexbox centering alignment handles absolute midpoints perfectly */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    /* Makes the background layer completely transparent */
+    background: transparent; 
+    
+    /* Optional: Intercepts clicks if using as a safety guard shield */
+    pointer-events: auto; 
+}
+
+.centered-image-plane img {
+    max-width: 90%;  /* Responsive bounding constraints */
+    max-height: 90%;
+    object-fit: contain;
+}
+        
         /* IP Display Area at the top - fully visible */
         #ip-tracker {
             font-size: 1rem;
@@ -116,5 +143,11 @@
             }
         })();
     </script>
+
+    <div class="centered-image-plane">
+    <img src="/data/cmip-fail-image.svg" alt="Centered Shield Graphic">
+</div>
+
+    
 </body>
 </html>
