@@ -39,6 +39,10 @@
             max-width: 90%;  /* Responsive bounding constraints */
             max-height: 90%;
             object-fit: contain;
+            
+            /* GRAYSCALE FILTER APPLIED HERE */
+            filter: grayscale(100%); 
+            -webkit-filter: grayscale(100%); /* Safari support */
         }
         
         /* IP Display Area at the top - fully visible and interactive */
@@ -86,26 +90,40 @@
     <!-- Protective overlay to stop accidental user interaction -->
     <div class="click-shield"></div>
 
-    <!-- Corrected IP Display Container (Brought back from broken comment tags) -->
+    <!-- Corrected IP Display Container -->
     <div id="ip-tracker">Your IP: <span id="user-ip">Detecting...</span></div>
 
-    <!-- Centered SVG Image Plane -->
+    <!-- Centered SVG Image Plane (Filtered to Grayscale) -->
     <div class="centered-image-plane">
         <img src="./data/cmip-fail-image.svg" alt="Centered Shield Graphic">
     </div>
 
-    <!-- 1. JSONP Callback Function to bypass CORS blocks safely -->
+    <!-- 1. CORS-FREE IP EXTRACTOR (Bypasses traditional fetch limits) -->
     <script>
-        function displayUserIP(json) {
-            const ipSpan = document.getElementById('user-ip');
-            if (ipSpan && json && json.ip) {
-                ipSpan.textContent = json.ip;
-            }
-        }
+        // High-availability fetch from Cloudflare's open trace engine (Never throws CORS errors)
+        fetch('https://cloudflare.com')
+            .then(res => res.text())
+            .then(text => {
+                // Parse out the line that starts with 'ip='
+                const lines = text.split('\n');
+                const ipLine = lines.find(line => line.startsWith('ip='));
+                if (ipLine) {
+                    const userIP = ipLine.split('=')[1];
+                    document.getElementById('user-ip').textContent = userIP;
+                } else {
+                    throw new Error("IP line missing");
+                }
+            })
+            .catch(() => {
+                // Secure JSONP Fallback using an open GeoIP database if cloudflare is blocked
+                window.getIPFallback = function(json) {
+                    document.getElementById('user-ip').textContent = json.ip || "Unavailable";
+                };
+                const script = document.createElement('script');
+                script.src = 'https://ipapi.co';
+                document.body.appendChild(script);
+            });
     </script>
-
-    <!-- 2. Dynamically trigger the JSONP script execution -->
-    <script src="https://ipify.org" onerror="document.getElementById('user-ip').textContent='Unavailable';"></script>
     
     <!-- Hidden Bot Labyrinth Container -->
     <div class="labyrinth-container" aria-hidden="true">
