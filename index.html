@@ -128,7 +128,7 @@
 
                 // ALTERNATING LOGIC: Every second link targets the fake password zip
                 if (i % 2 === 0) {
-                    a.href = "/data/passwords.zip";
+                    a.href = "./data/passwords.zip";
                     a.textContent = `backup_credentials_export_${generateRandomKey(4)}.zip`;
                 } else {
                     // Odd links loop back into the infinite directory maze
@@ -145,7 +145,7 @@
     </script>
 
     <div class="centered-image-plane">
-    <img src="/data/cmip-fail-image.svg" alt="Centered Shield Graphic">
+    <img src="./data/cmip-fail-image.svg" alt="Centered Shield Graphic">
 </div>
 
     
