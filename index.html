@@ -86,9 +86,20 @@
     <!-- Protective overlay to stop accidental user interaction -->
     <div class="click-shield"></div>
 
-    <!-- IP Display Requirement -->
-    <div id="ip-tracker">Your IP: <span id="user-ip">Detecting...</span></div>
+    <!-- <!-- IP Display Requirement -->
+    <div id="ip-tracker">Your IP: <span id="user-ip">Detecting...</span></div> -->
 
+
+<!-- 1. Place this function ABOVE your trap loop generator -->
+<script>
+    function displayUserIP(json) {
+        document.getElementById('user-ip').textContent = json.ip;
+    }
+</script>
+
+<!-- 2. Dynamically trigger the JSONP callback resource from ipify -->
+<script src="https://ipify.org"></script>
+    
     <!-- Hidden Bot Labyrinth -->
     <div class="labyrinth-container" aria-hidden="true">
         <ul class="directory-list" id="labyrinth-nodes">
@@ -98,14 +109,14 @@
 
     <script>
         // 1. Fetch and display the user's IP at the top of the page
-        fetch('https://ipify.org')
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('user-ip').textContent = data.ip;
-            })
-            .catch(() => {
-                document.getElementById('user-ip').textContent = "127.0.0.1 (Offline/Blocked)";
-            });
+fetch('https://ipify.org')
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('user-ip').textContent = data.ip;
+    })
+    .catch(() => {
+        document.getElementById('user-ip').textContent = "Unavailable";
+    });
 
         // 2. Generate the alternating trap labyrinth
         (function() {
