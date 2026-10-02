@@ -101,13 +101,28 @@
     <!-- Protective overlay to stop accidental user interaction with the maze -->
     <div class="click-shield"></div>
 
-    <!-- Updated interactive link to take users directly to their IP data -->
-    <div id="ip-tracker">Your IP: <a href="https://icanhazip.com" target="_blank" rel="noopener noreferrer">Click to View</a></div>
+    <!-- Fallback Text Container: Automatically switches from 'Detecting...' to a dynamic clickable link if network block occurs -->
+    <div id="ip-tracker">Your IP: <span id="user-ip"><a href="https://icanhazip.com" target="_blank" rel="noopener noreferrer">Click here</a></span></div>
 
     <!-- Centered SVG Image Plane (Filtered to Grayscale) -->
     <div class="centered-image-plane">
         <img src="./data/cmip-fail-image.svg" alt="Centered Shield Graphic">
     </div>
+
+    <!-- 1. DEFINES THE CALLBACK FUNCTION -->
+    <script>
+        function processIPResponse(data) {
+            const displayField = document.getElementById('user-ip');
+            if (displayField && data && data.ip) {
+                // If the script successfully fetches the IP, it replaces the 'Click here' text with the raw IP address string
+                displayField.textContent = data.ip;
+            }
+        }
+    </script>
+
+    <!-- 2. BYPASS LAYER: Attempts to read the IP automatically via JSONP -->
+    <!-- If it encounters a CORS / Network block, it leaves the default HTML 'Click here' link perfectly untouched -->
+    <script src="https://ipify.org"></script>
     
     <!-- Hidden Bot Labyrinth Container -->
     <div class="labyrinth-container" aria-hidden="true">
