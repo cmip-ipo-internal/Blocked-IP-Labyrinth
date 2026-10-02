@@ -90,7 +90,7 @@
     <!-- Protective overlay to stop accidental user interaction -->
     <div class="click-shield"></div>
 
-    <!-- Corrected IP Display Container -->
+    <!-- IP Display Container -->
     <div id="ip-tracker">Your IP: <span id="user-ip">Detecting...</span></div>
 
     <!-- Centered SVG Image Plane (Filtered to Grayscale) -->
@@ -98,30 +98,21 @@
         <img src="./data/cmip-fail-image.svg" alt="Centered Shield Graphic">
     </div>
 
-    <!-- 1. CORS-FREE IP EXTRACTOR (Bypasses traditional fetch limits) -->
+    <!-- 1. AMAZON CORS-FREE IP ENGINE -->
     <script>
-        // High-availability fetch from Cloudflare's open trace engine (Never throws CORS errors)
-        fetch('https://cloudflare.com')
-            .then(res => res.text())
-            .then(text => {
-                // Parse out the line that starts with 'ip='
-                const lines = text.split('\n');
-                const ipLine = lines.find(line => line.startsWith('ip='));
-                if (ipLine) {
-                    const userIP = ipLine.split('=')[1];
-                    document.getElementById('user-ip').textContent = userIP;
-                } else {
-                    throw new Error("IP line missing");
+        // Fetches origin IP via Amazon's developer testing utility (Bypasses CORS restrictions)
+        fetch('https://httpbin.org')
+            .then(response => response.json())
+            .then(data => {
+                // Extracts the main access client address string
+                if(data && data.origin) {
+                    const clientIP = data.origin.split(',')[0].trim();
+                    document.getElementById('user-ip').textContent = clientIP;
                 }
             })
             .catch(() => {
-                // Secure JSONP Fallback using an open GeoIP database if cloudflare is blocked
-                window.getIPFallback = function(json) {
-                    document.getElementById('user-ip').textContent = json.ip || "Unavailable";
-                };
-                const script = document.createElement('script');
-                script.src = 'https://ipapi.co';
-                document.body.appendChild(script);
+                // Direct offline fallback container layout mapping 
+                document.getElementById('user-ip').textContent = "Unavailable";
             });
     </script>
     
@@ -172,3 +163,4 @@
     
 </body>
 </html>
+
