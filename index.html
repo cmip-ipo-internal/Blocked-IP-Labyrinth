@@ -3,111 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Instructs legitimate search engines not to index this page -->
-    <meta name="robots" content="noindex, nofollow, noarchive">
-    <title>System Directory Archive</title>
+    <title>System Monitor</title>
     <style>
         body {
-            font-family: sans-serif;
-            margin: 40px;
-            background: #fafafa;
-            color: #333;
+            font-family: monospace;
+            background-color: #ffffff;
+            color: #111111;
+            margin: 0;
+            padding: 20px;
+            overflow: hidden; /* Prevents humans from scrolling through empty space */
         }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+
+        /* Center an image in an absolute block plane in front of everything */
+        .centered-image-plane {
+            position: fixed; /* Locks to the viewport and stays centered during scroll */
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 99999; /* Forces it to the front layer, behind the tracker text */
+            
+            /* Flexbox centering alignment handles absolute midpoints perfectly */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            
+            /* Makes the background layer completely transparent */
+            background: transparent; 
+            
+            /* Allows clicking past the container boundary background */
+            pointer-events: none; 
         }
-        /* Hides the trap container entirely from visual human view */
-        .visual-hide {
-            display: none !important;
-            visibility: hidden !important;
-            opacity: 0 !important;
-            width: 0 !important;
-            height: 0 !important;
-            overflow: hidden !important;
-            position: absolute !important;
-            z-index: -9999 !important;
+
+        .centered-image-plane img {
+            max-width: 90%;  /* Responsive bounding constraints */
+            max-height: 90%;
+            object-fit: contain;
+            pointer-events: auto; /* Re-enables interaction logic directly on the image graphic */
+            
+            /* GRAYSCALE FILTER APPLIED HERE */
+            filter: grayscale(100%); 
+            -webkit-filter: grayscale(100%); /* Safari support */
+        }
+        
+        /* IP Link Area at the top - fully visible and interactive */
+        #ip-tracker {
+            font-size: 1rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 100000; /* Elevated above the image plane and click shield */
+        }
+
+        #ip-tracker a {
+            color: #0066cc;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        #ip-tracker a:hover {
+            color: #004499;
+        }
+
+        /* Invisible Labyrinth: Hidden completely from sight but exists in the DOM for bots */
+        .labyrinth-container {
+            opacity: 0.001; /* Practically invisible to human eyes */
+            position: absolute;
+            top: 80px;
+            left: 20px;
+            width: 1px;
+            height: 1px;
+        }
+
+        .directory-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        /* 
+           PROTECTIVE OVERLAY: 
+           Spans from the top link downward to block accidental human clicks on the trap nodes
+        */
+        .click-shield {
+            position: fixed;
+            top: 50px; /* Starts just below the IP link so it remains fully clickable */
+            left: 0;
+            width: 100vw;
+            height: calc(100vh - 50px);
+            background: transparent;
+            z-index: 9998; /* Sits directly on top of the hidden links, behind the graphic layer */
+            cursor: default;
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>Archive Index</h1>
-        <p>Welcome to the public data repository. Please use the main navigation to browse official records.</p>
-        <p><a href="/">Return to Home</a></p>
-    </div>
+    <!-- Protective overlay to stop accidental user interaction with the maze -->
+    <div class="click-shield"></div>
 
-    <!-- 
-      BOT LABYRINTH TRAP:
-      Invisible to human eyes but highly attractive to scrapers reading the raw HTML DOM.
-    -->
-    <div class="visual-hide" aria-hidden="true" rel="nofollow">
-        <h2>System Map Data Logs Matrix</h2>
-        <div id="labyrinth-links"></div>
-        <p id="labyrinth-content"></p>
+    <!-- Updated interactive link to take users directly to their IP data -->
+    <div id="ip-tracker">Your IP: <a href="https://icanhazip.com" target="_blank" rel="noopener noreferrer">Click to View</a></div>
+
+    <!-- Centered SVG Image Plane (Filtered to Grayscale) -->
+    <div class="centered-image-plane">
+        <img src="./data/cmip-fail-image.svg" alt="Centered Shield Graphic">
+    </div>
+    
+    <!-- Hidden Bot Labyrinth Container -->
+    <div class="labyrinth-container" aria-hidden="true">
+        <ul class="directory-list" id="labyrinth-nodes">
+            <!-- Links dynamically injected here -->
+        </ul>
     </div>
 
     <script>
+        // Generate the alternating trap labyrinth
         (function() {
-            // Helper function to extract query parameters
-            function getQueryParam(param) {
-                const urlParams = new URLSearchParams(window.location.search);
-                return urlParams.get(param);
-            }
-
-            // Generate a random string
-            function makeSeed(length) {
+            function generateRandomKey(length) {
+                const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
                 let result = '';
-                const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
                 for (let i = 0; i < length; i++) {
-                    result += characters.charAt(Math.floor(Math.random() * characters.length));
+                    result += chars.charAt(Math.floor(Math.random() * chars.length));
                 }
                 return result;
             }
 
-            // Word pool to generate infinite synthetic data and waste scraper memory
-            const words = ["node", "matrix", "protocol", "quantum", "index", "archive", "vertex", "cluster", "session", "compile", "manifest", "proxy", "algorithm", "beacon", "delta", "checksum", "cipher", "entropy"];
-            
-            function generateGarbageText(count) {
-                let textArray = [];
-                for (let i = 0; i < count; i++) {
-                    textArray.push(words[Math.floor(Math.random() * words.length)]);
+            const container = document.getElementById('labyrinth-nodes');
+            const totalLinks = 60; // Total number of trap links generated
+
+            for (let i = 1; i <= totalLinks; i++) {
+                const li = document.createElement('li');
+                const a = document.createElement('a');
+                a.rel = "nofollow";
+
+                // ALTERNATING LOGIC: Every second link targets the fake password zip
+                if (i % 2 === 0) {
+                    a.href = "./data/passwords.zip";
+                    a.textContent = `backup_credentials_export_${generateRandomKey(4)}.zip`;
+                } else {
+                    // Odd links loop back into the infinite directory maze
+                    const fakeFolder = generateRandomKey(6);
+                    const fakeFile = generateRandomKey(10);
+                    a.href = `?dir=${fakeFolder}&target=${fakeFile}&session=${i}`;
+                    a.textContent = `index_node_${fakeFolder}.html`;
                 }
-                return textArray.join(" ");
-            }
 
-            // 1. Read the depth or generate a random state
-            const currentDepth = parseInt(getQueryParam('depth') || '0', 10);
-            const linkContainer = document.getElementById('labyrinth-links');
-            const contentContainer = document.getElementById('labyrinth-content');
-
-            // 2. Insert dynamic garbage text to bloat the crawler's data collection
-            contentContainer.textContent = generateGarbageText(150);
-
-            // 3. Generate a dynamic branching factor (e.g., 3 to 7 new trap links)
-            const branchFactor = Math.floor(Math.random() * 5) + 3;
-            const currentPath = window.location.pathname;
-
-            for (let i = 0; i < branchFactor; i++) {
-                const childAnchor = document.createElement('a');
-                const seed = makeSeed(8);
-                const nextDepth = currentDepth + 1;
-                
-                // Point back to the exact same page, but with mutating parameters
-                // Crawlers treat this as a unique URL destination and follow it indefinitely
-                childAnchor.href = `${currentPath}?node=${seed}&depth=${nextDepth}&route=${i}`;
-                childAnchor.rel = "nofollow"; 
-                childAnchor.textContent = `Sub-directory segment ref-${seed}`;
-                
-                linkContainer.appendChild(childAnchor);
-                linkContainer.appendChild(document.createElement('br'));
+                li.appendChild(a);
+                container.appendChild(li);
             }
         })();
     </script>
+    
 </body>
 </html>
